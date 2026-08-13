@@ -1,5 +1,6 @@
 package com.documentpassport
+import config.DatabaseConfig
 
 object Main extends App {
-    println("Hello, world!")
+    DatabaseConfig.confFlyway
 }
