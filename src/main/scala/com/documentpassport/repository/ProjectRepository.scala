@@ -1,28 +1,19 @@
 package com.documentpassport.repository
 
+import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._
-import slick.ast.ColumnOption
-import slick.lifted.Rep
-import slick.ast.TypedType
-import slick.lifted.ProvenShape
+import scala.concurrent.{Future}
 
-case class Project(
-    id: Option[Long], 
-    name: String, 
-    address: String, 
-    projectType: String, 
-    createdAt: java.time.LocalDateTime
-)
+class ProjectRepository(db: Database){
+    def findAll: Future[Seq[Project]] = {
+        db.run(Projects.query.result)
+    }
 
-class Projects(tag: Tag) extends Table[Project](tag, "projects") {
-    val id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    val name = column[String]("name")
-    val address = column[String]("address")
-    val projectType = column[String]("project_type")
-    val createdAt = column[java.time.LocalDateTime]("created_at")
-    def * = (id.?, name, address, projectType, createdAt) <> ((Project.apply _).tupled, Project.unapply)
-}
+    def findById(id: Long): Future[Option[Project]] = {
+        db.run(Projects.query.filter(_.id === id).result.headOption)
+    }
 
-object Projects {
-    val query = TableQuery[Projects]
+    def add(project: Project): Future[Long] = {
+        db.run((Projects.query returning Projects.query.map(_.id)) += project)
+    }
 }
